@@ -1,5 +1,4 @@
 ///----Libraries---///
-#include <Adafruit_NeoPixel.h>
 #include <Wire.h>
 #include "TSL2561.h"
 
@@ -11,8 +10,8 @@
 #define GREEN_PIN 6
 
 //moisture sensor
-int thresholdUp = 400;
-int thresholdDown = 250;
+int thresholdUp = 900;
+int thresholdDown = 400;
 int sensorPin = A0;
 
 #define RED_PINm 11
@@ -20,7 +19,6 @@ int sensorPin = A0;
 #define BLUE_PINm 10
 
 ///---Initialization---///
-//Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
 TSL2561 tsl(TSL2561_ADDR_FLOAT); 
 
 ///---Setup---///
@@ -32,15 +30,18 @@ void setup() {
   pinMode(RED_PINm, OUTPUT);
   pinMode(GREEN_PINm, OUTPUT);
   pinMode(BLUE_PINm, OUTPUT);
+  
   if (tsl.begin()) 
   {
     Serial.println("Found sensor");
   } 
+  
   else 
   {
     Serial.println("No sensor?");
     while (1);
   } 
+  
   //tsl.enableAutoRange(true);
   tsl.setGain(TSL2561_GAIN_0X); //Avoids sensor saturation
   tsl.setTiming(TSL2561_INTEGRATIONTIME_101MS);
@@ -48,8 +49,7 @@ void setup() {
 
 void loop(){
 
-
-  
+  // moisture sensor
   String DisplayWords;
   int sensorValue;
   sensorValue = analogRead(sensorPin);
@@ -66,8 +66,6 @@ void loop(){
   // If the value is not below our thresholdDown value we want to 
   // check if it is above our thresholdUp value, and if it is 
   // change the display words to "Wet, Leave it!":
-
-
 
   } else if (sensorValue >= thresholdUp){
     analogWrite(BLUE_PINm,255);
@@ -91,21 +89,22 @@ void loop(){
     Serial.println(DisplayWords);
   }
 
-  delay(1000); //wait for half a second, so it is easier to read
+  delay(100); //wait for half a second, so it is easier to read
+
+  // light sensor
   uint16_t x = tsl.getLuminosity(TSL2561_VISIBLE); //  measure ambient light
   String stringOne = "The luminosity is: " ;
   String stringThree = stringOne + x;
-  Serial.println(stringThree); 
-  if (x<100)
-  {
+  Serial.println(stringThree);
+  
+  if (x<100) {
     analogWrite(GREEN_PIN, 0);
     analogWrite(BLUE_PIN, 0);
     analogWrite(RED_PIN, 255);
     Serial.println("More light!");
-    delay(1000);
+    delay(500);
   }
-  else
-  {
+  else {
       unsigned int rgbColour[3];
       Serial.println("So much light yay :D");
       // Start off with red.
@@ -126,7 +125,7 @@ void loop(){
           delay(5);
         }
   }
-  delay(1000);
+  delay(200);
   }
 }
 
